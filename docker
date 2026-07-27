@@ -1,0 +1,637 @@
+# Docker – Creating and Publishing Custom Nginx Images
+
+## Overview
+
+This practical introduced the fundamentals of Docker image creation and publishing using Nginx.
+
+Two different approaches were completed:
+
+1. Creating a Docker image from a running container using `docker commit`.
+2. Automating the image creation process using a `Dockerfile`.
+
+The first task demonstrated how changes made inside a running container can be saved as a reusable image. The second task introduced Infrastructure as Code (IaC) principles by automating the image creation process with a Dockerfile, removing the need to manually edit containers.
+
+---
+
+# Learning Objectives
+
+By completing these tasks I learned how to:
+
+- Understand the difference between Docker images and containers.
+- Modify files inside a running Docker container.
+- Create Docker images using `docker commit`.
+- Publish Docker images to Docker Hub.
+- Create Docker images using a Dockerfile.
+- Automate image creation instead of manually editing containers.
+- Share Docker images so anyone can download and run them.
+
+---
+
+# Task 1 – Creating an Image from a Running Container
+
+## Objective
+
+Create a custom Docker image from an already running Nginx container after modifying the default homepage and publish the image to Docker Hub.
+
+---
+
+## Step 1 – Access the Running Container
+
+The running Nginx container was accessed using:
+
+```bash
+docker exec -it jolly_solomon sh
+```
+
+### Explanation
+
+| Command | Purpose |
+|---------|----------|
+| docker exec | Executes a command inside a running container. |
+| -it | Opens an interactive shell. |
+| jolly_solomon | Name of the running container. |
+| sh | Opens the shell inside the container. |
+
+This allowed me to interact directly with the container's filesystem.
+
+---
+
+## Step 2 – Navigate to the Website Directory
+
+```bash
+cd /usr/share/nginx/html
+```
+
+### Explanation
+
+Nginx stores its default website inside:
+
+```
+/usr/share/nginx/html
+```
+
+The contents of the directory were checked using:
+
+```bash
+ls
+```
+
+Output:
+
+```
+50x.html
+index.html
+```
+
+Where:
+
+- `index.html` is the default homepage.
+- `50x.html` is displayed when Nginx encounters server errors.
+
+---
+
+## Step 3 – Modify the Default Homepage
+
+The homepage was edited using Nano.
+
+```bash
+nano index.html
+```
+
+The original heading:
+
+```html
+<h1>Welcome to nginx!</h1>
+```
+
+was replaced with:
+
+```html
+<h1>Welcome to Homaira's landing page!</h1>
+```
+
+The file was saved using:
+
+- Ctrl + O
+- Enter
+- Ctrl + X
+
+Refreshing the browser confirmed the customised webpage was now being served.
+
+---
+
+## Step 4 – Exit the Container
+
+After completing the modifications, I exited the container.
+
+```bash
+exit
+```
+
+This returned me to the Docker host.
+
+Docker management commands such as `docker commit` cannot be executed inside the container.
+
+---
+
+## Step 5 – Create an Image
+
+The running container was converted into a reusable Docker image.
+
+```bash
+docker commit jolly_solomon hdaum123/nginx-610
+```
+
+Docker returned:
+
+```
+sha256:0150d0149878417952007516ff9f0589c90023bce93098f9811db12b89d39f73
+```
+
+### Explanation
+
+`docker commit` captures the current state of a running container and saves it as a new Docker image.
+
+This image now permanently contains:
+
+- the customised homepage
+- all filesystem changes made inside the container
+
+---
+
+## Step 6 – Verify the Image
+
+The image was verified locally.
+
+```bash
+docker images
+```
+
+Example:
+
+```
+REPOSITORY
+hdaum123/nginx-610
+```
+
+---
+
+## Step 7 – Push to Docker Hub
+
+After logging into Docker Hub:
+
+```bash
+docker login
+```
+
+the image was uploaded using:
+
+```bash
+docker push hdaum123/nginx-610
+```
+
+Once uploaded, anyone with Docker installed can pull and run the image.
+
+---
+
+## Running the Published Image
+
+```bash
+docker run -d -p 80:80 hdaum123/nginx-610
+```
+
+or
+
+```bash
+docker run -d -p 90:80 hdaum123/nginx-610
+```
+
+depending on the preferred host port.
+
+---
+
+## Advantages
+
+- Very quick.
+- Useful for experimentation.
+- Easy way to save an existing container.
+
+---
+
+## Limitations
+
+This process is entirely manual.
+
+Every change requires:
+
+- entering the container
+- editing files
+- committing the container again
+
+This makes it difficult to reproduce consistently.
+
+---
+
+# Task 2 – Automating Image Creation with a Dockerfile
+
+## Objective
+
+Automate the creation of the customised Nginx image using a Dockerfile instead of manually editing a running container.
+
+---
+
+## Project Structure
+
+```
+tech610-mod-nginx-dockerfile/
+│
+├── Dockerfile
+└── index.html
+```
+
+---
+
+## Step 1 – Create the Custom Homepage
+
+A new homepage was created.
+
+Filename:
+
+```
+index.html
+```
+
+Contents:
+
+```html
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Homaira's Automated Nginx Page</title>
+</head>
+
+<body>
+
+<h1>Welcome to Homaira's Automated Nginx Page!</h1>
+
+<p>This page was created automatically using a Dockerfile.</p>
+
+</body>
+
+</html>
+```
+
+---
+
+## Step 2 – Create the Dockerfile
+
+A file named exactly:
+
+```
+Dockerfile
+```
+
+was created containing:
+
+```dockerfile
+FROM nginx:latest
+
+COPY index.html /usr/share/nginx/html/index.html
+```
+
+---
+
+## Dockerfile Breakdown
+
+### FROM
+
+```dockerfile
+FROM nginx:latest
+```
+
+This tells Docker to use the official Nginx image from Docker Hub as the base image.
+
+---
+
+### COPY
+
+```dockerfile
+COPY index.html /usr/share/nginx/html/index.html
+```
+
+This automatically replaces the default Nginx homepage with the custom webpage during the build process.
+
+Unlike Task 1, no manual editing of the container is required.
+
+---
+
+## Step 3 – Build the Image
+
+The image was built using:
+
+```bash
+docker build -t tech610-nginx-auto:1.0 .
+```
+
+### Explanation
+
+| Option | Purpose |
+|---------|----------|
+| docker build | Builds a Docker image. |
+| -t | Assigns the image name and tag. |
+| tech610-nginx-auto:1.0 | Image name and version. |
+| . | Uses the current directory as the build context. |
+
+During the build Docker automatically:
+
+1. Reads the Dockerfile.
+2. Downloads the Nginx image if necessary.
+3. Creates a temporary build container.
+4. Copies the custom webpage.
+5. Creates the new Docker image.
+6. Removes the temporary build container.
+
+No manual interaction with a running container is required.
+
+---
+
+## Step 4 – Test the Image
+
+The image was started using:
+
+```bash
+docker run -d -p 80:80 --name nginx-auto tech610-nginx-auto:1.0
+```
+
+Opening:
+
+```
+http://localhost
+```
+
+confirmed that the customised homepage was being served.
+
+---
+
+## Step 5 – Tag the Image
+
+Before uploading to Docker Hub the image was tagged using Docker Hub naming conventions.
+
+```bash
+docker tag tech610-nginx-auto:1.0 hdaum123/tech610-nginx-auto:1.0
+```
+
+Docker Hub images follow the format:
+
+```
+dockerhub-username/repository-name:tag
+```
+
+---
+
+## Step 6 – Push to Docker Hub
+
+The image was uploaded.
+
+```bash
+docker push hdaum123/tech610-nginx-auto:1.0
+```
+
+The image can now be downloaded by anyone.
+
+---
+
+## Running the Published Image
+
+```bash
+docker run -d -p 80:80 hdaum123/tech610-nginx-auto:1.0
+```
+
+or
+
+```bash
+docker run -d -p 90:80 hdaum123/tech610-nginx-auto:1.0
+```
+
+---
+
+# Why is the Dockerfile Automated?
+
+Task 1 required manually entering the running container.
+
+```
+docker exec
+↓
+
+Edit index.html
+↓
+
+docker commit
+```
+
+Task 2 removes these manual steps.
+
+```
+Dockerfile
+        ↓
+docker build
+        ↓
+Docker follows each instruction automatically
+        ↓
+Copies index.html
+        ↓
+Creates the finished image
+```
+
+Every build produces exactly the same result.
+
+This makes deployments:
+
+- repeatable
+- reliable
+- consistent
+- less prone to human error
+
+---
+
+# Manual vs Automated
+
+| Manual (`docker commit`) | Automated (`Dockerfile`) |
+|---------------------------|--------------------------|
+| Modify a running container | Define everything in code |
+| Requires manual changes | Fully automated |
+| Harder to reproduce | Easily reproducible |
+| Good for experimentation | Best practice for production |
+| Can introduce inconsistencies | Produces consistent builds |
+
+---
+
+# Common Commands Used
+
+### List Images
+
+```bash
+docker images
+```
+
+Lists all local Docker images.
+
+---
+
+### List Running Containers
+
+```bash
+docker ps
+```
+
+Displays currently running containers.
+
+---
+
+### Stop a Container
+
+```bash
+docker stop <container-name>
+```
+
+Stops a running container.
+
+---
+
+### Remove a Container
+
+```bash
+docker rm <container-name>
+```
+
+Deletes a stopped container.
+
+---
+
+### Build an Image
+
+```bash
+docker build -t image:tag .
+```
+
+Creates a Docker image using the Dockerfile.
+
+---
+
+### Tag an Image
+
+```bash
+docker tag local-image username/repository:tag
+```
+
+Prepares an image for Docker Hub.
+
+---
+
+### Push an Image
+
+```bash
+docker push username/repository:tag
+```
+
+Uploads an image to Docker Hub.
+
+---
+
+### Pull an Image
+
+```bash
+docker pull username/repository:tag
+```
+
+Downloads an image from Docker Hub.
+
+---
+
+### Run a Container
+
+```bash
+docker run -d -p 80:80 username/repository:tag
+```
+
+Creates and starts a container.
+
+---
+
+# Blockers Encountered
+
+## Docker Command Not Found
+
+Initially, I attempted to run:
+
+```bash
+docker commit
+```
+
+from inside the running container.
+
+This resulted in:
+
+```
+docker: command not found
+```
+
+### Resolution
+
+Exited the container using:
+
+```bash
+exit
+```
+
+and executed the command from the Docker host instead.
+
+---
+
+## Docker Hub Image Not Found
+
+When attempting to run:
+
+```bash
+docker run hdaum123/tech610-nginx-auto:1.0
+```
+
+Docker returned:
+
+```
+image not found
+```
+
+### Cause
+
+The local image had not yet been tagged and pushed to Docker Hub.
+
+### Resolution
+
+Tagged the image:
+
+```bash
+docker tag tech610-nginx-auto:1.0 hdaum123/tech610-nginx-auto:1.0
+```
+
+Then pushed it:
+
+```bash
+docker push hdaum123/tech610-nginx-auto:1.0
+```
+
+---
+
+# Key Learning Outcomes
+
+Throughout these tasks I learned:
+
+- The difference between Docker images and containers.
+- How to modify a running container.
+- How to create an image using `docker commit`.
+- How Docker Hub stores and distributes images.
+- How Dockerfiles automate image creation.
+- Why Infrastructure as Code is preferred over manual configuration.
+- How to build, tag, push and run Docker images.
+- The importance of automation and reproducibility within DevOps workflows.
