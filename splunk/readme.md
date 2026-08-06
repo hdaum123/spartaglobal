@@ -24,6 +24,9 @@ A SOC works in much the same way, except instead of monitoring people, it monito
 | Reporting         | Documenting incidents and recommending improvements.                    |
 | Threat Hunting    | Proactively searching for threats that automated tools may have missed. |
 
+### Challenges 
+
+
 ---
 ## What is SIEM?
 
@@ -34,9 +37,13 @@ A **Security Information and Event Management (SIEM)** system collects and analy
 A SIEM is like the monitoring equipment in a hospital. Doctors cannot constantly check every patient, so monitors watch vital signs and raise an alarm when something abnormal happens. In the same way, a SIEM continuously monitors systems and alerts analysts when suspicious behaviour is detected.
 
 ## Examples of SIEM softwares
+- **Splunk Enterprise Security** - SIEM platform used to collect, analyse and investigate security events from multiple data sources in real time 
+- **Microsoft Sentinel** - cloud-native siem built on microsoft azure, which helps organisations detect, investigate and respond to cyber security attacks.
+
 ---
 
 ## What is Splunk?
+**Splunk** is a data platform that collects, indexes, searches and analyses machine-generated data from sources like servers, application, network. It enables organisations to monitor systems, investigate incidents and detect cyber security threat in real time.
 
 ### What can it be used for and why?
 
@@ -46,4 +53,22 @@ A SIEM is like the monitoring equipment in a hospital. Doctors cannot constantly
 
 ### Architecture
 
+What are the components of Splunk Architecture?
+Search Head
+Universal Forwarders
+Indexers
+
+What are some of the options for deploying Splunk (Search Head)?
+What are some of the basic terms in Splunk?
+What type of data/files does Splunk usually ingest?
+How can Splunk onboard/ingest data?
+What are events?
+
+What is SPL?
+Show some basic examples of SPL:
+Basic searches
+Basic transformations
+Basic visualisations
+
+What are some of the things you can produce in Splunk (e.g. dashboards)?
 
