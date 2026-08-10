@@ -587,17 +587,3 @@ index=web
 
 This removes duplicate client IP addresses and displays the unique values.
 
----
-
-# Key Things I've Learned So Far
-
-- Splunk collects and analyses machine-generated data.
-- Forwarders collect data and send it to Splunk.
-- Indexers process and store the data.
-- Search Heads allow users to search and analyse the data.
-- Host, source and sourcetype describe where data came from and what type of data it is.
-- Knowledge Objects make searches and analysis reusable.
-- Fields are key-value pairs within events.
-- SPL is used to search and manipulate Splunk data.
-- Pipes allow multiple SPL commands to be combined.
-- Commands such as `table`, `fields`, `rename`, `dedup` and `sort` can be used to manipulate search results.
